@@ -1,4 +1,5 @@
 import * as XMLGramAsc from './Gramatica/XML_GramaticaAsc';
+import * as XQueryGram from './Gramatica/XQuery_GramaticaAsc';
 import {Entorno} from './AST/Entorno';
 import { Objeto } from './XML/Objeto';
 import { Atributo } from './XML/Atributo';
@@ -10,6 +11,8 @@ import * as XPathGramDesc from "./Gramatica/XPath_GramaticaDesc";
 import { Consulta } from './XPath/Consulta';
 import {cstXmlAsc, cstXmlDesc, cstXpathAsc, cstXpathDesc} from './Reporte/CST';
 import {Nodo} from './Reporte/Nodo';
+import { InstruccionXQuery } from './Interfaz/instruccionXQuery';
+import traductorXML from './Traduccion/TraduceXML';
 
 //const XPathGramAsc = require('../XPath_GramaticaAsc');
 //const XPathGramDesc = require('../XPath_GramaticaDesc');
@@ -82,9 +85,11 @@ class Analizador{
     consultas.forEach((elem: Consulta) => {
         console.log("CONSULTA: "+ elem.ToString());
         let resultado = elem.ejecutar(this.global);
-        salida += resultado;
+        salida += elem.simbolosToString(resultado)+"\n";
         console.log("-----------RESULTADO----------------");
         console.log(resultado);
+        console.log("StringResult:")
+        //console.log(elem.simbolosToString(resultado));
         console.log("---------------FIN---------------------")
     });
     return salida;
@@ -98,12 +103,23 @@ class Analizador{
     consultas.forEach((elem: Consulta) => {
       console.log("CONSULTA: " + elem.ToString());
       let resultado = elem.ejecutar(this.global);
-      salida += resultado;
+      salida += elem.simbolosToString(resultado)+"\n";
       console.log("-----------RESULTADO----------------");
       console.log(resultado);
+      console.log("TOSTRING:")
+      console.log(elem.simbolosToString(resultado));
       console.log("---------------FIN---------------------");
     });
     return salida
+  }
+
+  XQueryAscendente(entrada: string): String{
+    console.log("---- XQUERY ASCENDENTE ----- ")
+    const instrucciones: InstruccionXQuery = XQueryGram.parse(entrada);
+    let salida = "";
+    salida += instrucciones.ejecutar(new Entorno("XQGlobal", null, null), this.global);
+    //console.log("SALIDA: ", salida);
+    return salida;
   }
 
   getTablaSimbolos(){
@@ -134,7 +150,9 @@ class Analizador{
                 +            '<td><b>AMBITO</b></td>'
                 +            '<td><b>NODO</b></td>'
                 +            '<td><b>VALOR</b></td>'
-                +            '<td><b>FILA</b></td><td><b>COLUMNA</b></td>'
+                +            '<td><b>FILA</b></td>'
+                +            '<td><b>COLUMNA</b></td>'
+                +            '<td><b>POSICION</b></td>'
                 +        '</tr>';
     cadenaDot = cadenaDot + this.getSimbolosEntorno(this.global);
     cadenaDot = cadenaDot +      '</table>'
@@ -151,13 +169,14 @@ class Analizador{
         simbolos = simbolos
                 +        '<tr>'
                 +            '<td>'+this.indice+'</td>'
-                +            '<td>'+elem.valor.nombre+'</td>'
-                +            '<td>'+this.getTipoDato(elem.valor.tipo)+'</td>'
+                +            '<td>'+elem.valor.getNombre()+'</td>'
+                +            '<td>'+this.getTipoDato(elem.valor.getTipo())+'</td>'
                 +            '<td>'+entrada.nombre+'</td>'
                 +            '<td>'+elem.nombre+'</td>'
                 +            '<td>Nodo</td>'
-                +            '<td>'+elem.valor.linea+'</td>'
-                +            '<td>'+elem.valor.columna+'</td>'
+                +            '<td>'+elem.valor.getLinea()+'</td>'
+                +            '<td>'+elem.valor.getColumna()+'</td>'
+                +            '<td>'+elem.valor.getPosicion()+'</td>'
                 +        '</tr>';
         simbolos = simbolos + this.getSimbolosEntorno(elem.valor.valor);
       }else{
@@ -166,13 +185,14 @@ class Analizador{
           simbolos = simbolos
                   +        '<tr>'
                   +            '<td>'+this.indice+'</td>'
-                  +            '<td>'+elem.valor.nombre+'</td>'
-                  +            '<td>'+this.getTipoDato(elem.valor.tipo)+'</td>'
+                  +            '<td>'+elem.valor.getNombre()+'</td>'
+                  +            '<td>'+this.getTipoDato(elem.valor.getTipo())+'</td>'
                   +            '<td>'+entrada.nombre+'</td>'
                   +            '<td>'+elem.nombre+'</td>'
-                  +            '<td>'+elem.valor.valor.toString().replace('&','and')+'</td>'
-                  +            '<td>'+elem.valor.linea+'</td>'
-                  +            '<td>'+elem.valor.columna+'</td>'
+                  +            '<td>'+elem.valor.getValor().toString().replace('&','and')+'</td>'
+                  +            '<td>'+elem.valor.getLinea()+'</td>'
+                  +            '<td>'+elem.valor.getColumna()+'</td>'
+                  +            '<td>'+elem.valor.getPosicion()+'</td>'
                   +        '</tr>';
         }
       }
@@ -242,6 +262,14 @@ class Analizador{
     }
     return concatena;
   }
+  
+  public traduceXML():string{
+    let resultado:string = '';
+    resultado = traductorXML.traducirXML();
+    console.log(resultado);
+    return resultado;
+  }
+
 }
 
 const analizador = new Analizador();

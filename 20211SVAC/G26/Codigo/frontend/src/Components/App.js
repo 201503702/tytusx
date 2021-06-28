@@ -64,10 +64,6 @@ class App extends React.Component {
     this.setState({dot: value});
   }
 
-  handleDot = (value) => {
-    this.setState({listaErrores: value});
-  }
-
   nuevo = () => {
     this.setState({fileName: '', xml: '', xpath: ''});
   }
@@ -177,6 +173,7 @@ class App extends React.Component {
   }
 
   reporteTablaSimbolos = (event) => {
+    analizador.traduceXML();
     this.setState({dot:analizador.getRepTablaSimbolos()});
   }
 
@@ -330,17 +327,17 @@ class App extends React.Component {
                     <Button className="btn bg-danger" onClick={this.reporteListaErrores}>Lista de Errores</Button> |
                     <Button className="btn bg-warning">GRAMATICA</Button>
                     <br></br>
-                    <div id="pnlGraphviz" style={{borderStyle: 'solid', borderRadius: '2em'}}>
+                    <div style={{borderStyle: 'solid', borderRadius: '2em'}}>
                       <Graphviz dot={this.state.dot} options={{fit:true, width:950,zoom: true}}/>
                     </div>
-                  </div>
-                </div>
-                <div className="row">
-                  <div className="col-md-12">
-                    <Paper>
-                      <InputLabel style={{fontWeight: 'bold', fontFamily: 'sans-serif'}}>LISTA ERRORES</InputLabel> 
-                      <div id="pnlErorres" dangerouslySetInnerHTML={{ __html: this.state.listaErrores }} />
-                    </Paper>
+                    <div className="row">
+                      <div className="col-md-12">
+                        <Paper>
+                          <InputLabel style={{fontWeight: 'bold', fontFamily: 'sans-serif'}}>LISTA ERRORES</InputLabel> 
+                          <div id="pnlErorres" dangerouslySetInnerHTML={{ __html: this.state.listaErrores }} />
+                        </Paper>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </Paper> 
